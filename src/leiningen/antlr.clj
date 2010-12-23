@@ -46,17 +46,25 @@ a full listing of configuration options."}
                    (sub-dirs d))))
     '()))
 
+(defn has-suffix?
+  "Returns true if file f has one of the given suffixes as its filename extension. The suffixes should not include the '.' character."
+  [suffixes f]
+  (let [n (.getName f)
+        idx (.lastIndexOf n ".")
+        suffix (if (> idx -1) (.substring n (inc idx)))]
+    (contains? suffixes suffix)))
+
 (defn dirs-with-type
-  "Recursively find all directories rooted at f that contain a file with the given suffix as a direct child."
-  [^File f ^String suffix]
-  (filter (fn [^File d] (some #(.endsWith (.getName %) suffix)
+  "Recursively find all directories rooted at f that contain a file with one of the given suffixes as a direct child."
+  [^File f suffixes]
+  (filter (fn [^File d] (some (partial has-suffix? suffixes)
                               (.listFiles d)))
           (sub-dirs f)))
 
 (defn files-of-type
-  "List all files that are direct children of the given directory with names ending in the given suffix."
-  [^File dir ^String suffix]
-  (seq (.listFiles dir (proxy [FileFilter] [] (accept [f] (.endsWith (.getName f) suffix))))))
+  "List all files that are direct children of the given directory with names ending in one of the given suffixes."
+  [^File dir suffixes]
+  (seq (.listFiles dir (proxy [FileFilter] [] (accept [f] (has-suffix? suffixes f))))))
 
 (defn relative-paths
   "Takes a root directory 'parent' and a seq of children within the directory, and returns a seq of
@@ -101,9 +109,8 @@ the org.antlr.Tool class."} opts-to-setter-map
    :report 'setReport
    :profile 'setProfile})
 
-(defn file-type
-  "Gets the filename suffix that will be used to identify ANTLR grammars. Defaults to '.g'"
-  [antlr-opts] (get antlr-opts :antlr-file-suffix ".g"))
+(def ^{:doc "The collection of file extensions that ANTLR accepts (hard-coded in the ANTLR tool)."}
+      file-types #{"g" "g3"})
 
 (defmacro make-antlr-tool [antlr-opts]
   "Creates the ANTLR tool and initializes it with the configuration settings in antlr-opts."
@@ -133,7 +140,7 @@ the org.antlr.Tool class."} opts-to-setter-map
 with the given configuration options."
   [^File input-dir ^File output-dir antlr-opts]
   (let [antlr-opts (if *silently* (assoc antlr-opts :verbose false) antlr-opts)
-        grammar-files (files-of-type input-dir (file-type antlr-opts))
+        grammar-files (files-of-type input-dir file-types)
         antlr-tool (make-antlr-tool antlr-opts)]
     ;; The ANTLR tool uses static state to track errors -- reset before each run.
     (org.antlr.tool.ErrorManager/resetErrorState)
@@ -148,7 +155,7 @@ with the given configuration options."
 grammar files to generate output in a corresponding subdirectory of the destination directory, using the given config options."
   ([^File src-dir ^File dest-dir] (compile-antlr src-dir dest-dir nil))
   ([^File src-dir ^File dest-dir antlr-opts]
-    (let [input-dirs (dirs-with-type src-dir (file-type antlr-opts))]
+    (let [input-dirs (dirs-with-type src-dir file-types)]
       (if (empty? input-dirs)
         (if (not *silently*) (println "ANTLR source directory" (.getPath src-dir) "is empty."))
         (let [output-dirs (absolute-files dest-dir (relative-paths src-dir input-dirs))]
