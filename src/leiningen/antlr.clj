@@ -135,6 +135,8 @@ with the given configuration options."
   (let [antlr-opts (if *silently* (assoc antlr-opts :verbose false) antlr-opts)
         grammar-files (files-of-type input-dir (file-type antlr-opts))
         antlr-tool (make-antlr-tool antlr-opts)]
+    ;; The ANTLR tool uses static state to track errors -- reset before each run.
+    (org.antlr.tool.ErrorManager/resetErrorState)
     (if (not *silently*) (println "Compiling ANTLR grammars:" (apply str (interpose " " (map #(.getName %) grammar-files))) "..."))
     (prepare-tool antlr-tool input-dir output-dir grammar-files)
     (.process antlr-tool)
