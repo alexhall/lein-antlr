@@ -1,4 +1,4 @@
-(defproject lein-antlr "0.1.0-SNAPSHOT"
+(defproject lein-antlr "0.1.0"
   :description "Generate source code from ANTLR grammars in Leiningen."
   :dependencies [[org.antlr/antlr "3.2"]]
   
