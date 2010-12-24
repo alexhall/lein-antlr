@@ -6,7 +6,15 @@ code from one or more [ANTLR](http://www.antlr.org) grammars in a Leiningen proj
 the same functionality as the Maven ANTLR plugin, and is intended to allow developers to integrate
 ANTLR-generated source code into a Clojure project without resorting to Maven or some other manual process.
 
----
+Download It
+-----------
+
+The lein-antlr plugin is available for download at [Clojars](http://clojars.org/). The group and
+artifact IDs are both 'lein-antlr'.
+
+Or better, yet, just add it to your project's dev-dependencies and let Leiningen do the work for you:
+
+    :dev-dependencies [[lein-antlr "0.1.0"]]
 
 Usage
 -----
