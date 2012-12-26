@@ -14,8 +14,7 @@
 
 (ns leiningen.test-antlr
   (:use [leiningen.antlr :only (antlr)]
-        [leiningen.compile :only (*silently*)]
-        [leiningen.util.file :only (delete-file-recursively)]
+        [leiningen.clean :only (delete-file-recursively)]
         [clojure.test])
   (:import [java.io File]))
 
@@ -49,13 +48,6 @@
 (deftest test-antlr-invalid
   (is (thrown? RuntimeException (antlr (antlr-project "test-invalid"))))
   (is (false? (out-file-exists "test-invalid/InvalidCalcLexer.java"))))
-
-(deftest test-silent
-  (let [proj (assoc (antlr-project "test") :antlr-dest-dir (str antlr-out-dir \/ "test-silent"))
-        result (with-out-str (binding [*silently* true] (antlr proj)))]
-    (is (empty? result)))
-  (is (true? (out-file-exists "test-silent/SimpleCalcParser.java")))
-  (is (true? (out-file-exists "test-silent/paren/ParenCalcParser.java"))))
 
 (deftest test-suffix
   (antlr (antlr-project "test-suffix"))

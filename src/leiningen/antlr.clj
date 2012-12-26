@@ -28,10 +28,8 @@ A typical project configuration will look like:
 The plugin can be invoked by calling 'lein antlr' from the command line. See the project README for
 a full listing of configuration options."}
   leiningen.antlr
-  (:require leiningen.clean)
-  (:use [leiningen.util.file :only (delete-file-recursively)]
-        [robert.hooke :only (add-hook)]
-        [leiningen.compile :only (*silently*)])
+  (:use [leiningen.clean :as clean :only (clean delete-file-recursively)]
+        [robert.hooke :only (add-hook)])
   (:import [java.io File FileFilter]
            [java.net URI]
            [org.antlr Tool]))
@@ -83,8 +81,7 @@ and returns a seq of absolute File objects that represent those relative paths r
       (File. (.resolve parent-uri child-path)))))
 
 (def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
-  {:conversion-timeout 10000
-   :debug false
+  {:debug false
    :trace false
    :dfa false
    :nfa false
@@ -95,10 +92,9 @@ and returns a seq of absolute File objects that represent those relative paths r
    :report false
    :profile false})
 
-(def ^{:doc "Mapping of option names to symbols representing the corresponding setter methods on 
+(def ^{:doc "Mapping of option names to symbols representing the corresponding setter methods on
 the org.antlr.Tool class."} opts-to-setter-map
-  {:conversion-timeout 'setConversionTimeout
-   :debug 'setDebug
+  {:debug 'setDebug
    :trace 'setTrace
    :dfa 'setGenerate_DFA_dot
    :nfa 'setGenerate_NFA_dot
@@ -139,12 +135,11 @@ the org.antlr.Tool class."} opts-to-setter-map
   "Processes ANTLR grammar files in the given intput directory to generate output in the given output directory
 with the given configuration options."
   [^File input-dir ^File output-dir antlr-opts]
-  (let [antlr-opts (if *silently* (assoc antlr-opts :verbose false) antlr-opts)
-        grammar-files (files-of-type input-dir file-types)
+  (let [grammar-files (files-of-type input-dir file-types)
         antlr-tool (make-antlr-tool antlr-opts)]
     ;; The ANTLR tool uses static state to track errors -- reset before each run.
     (org.antlr.tool.ErrorManager/resetErrorState)
-    (if (not *silently*) (println "Compiling ANTLR grammars:" (apply str (interpose " " (map #(.getName %) grammar-files))) "..."))
+    (println "Compiling ANTLR grammars:" (apply str (interpose " " (map #(.getName %) grammar-files))) "...")
     (prepare-tool antlr-tool input-dir output-dir grammar-files)
     (.process antlr-tool)
     (if (> (.getNumErrors antlr-tool) 0)
@@ -157,7 +152,7 @@ grammar files to generate output in a corresponding subdirectory of the destinat
   ([^File src-dir ^File dest-dir antlr-opts]
     (let [input-dirs (dirs-with-type src-dir file-types)]
       (if (empty? input-dirs)
-        (if (not *silently*) (println "ANTLR source directory" (.getPath src-dir) "is empty."))
+        (println "ANTLR source directory" (.getPath src-dir) "is empty.")
         (let [output-dirs (absolute-files dest-dir (relative-paths src-dir input-dirs))]
           (doseq [[input-dir output-dir] (map list input-dirs output-dirs)]
             (process-antlr-dir input-dir output-dir antlr-opts)))))))
@@ -181,7 +176,7 @@ grammar files to generate output in a corresponding subdirectory of the destinat
   "Clean the ANTLR output directory."
   [f & [project & _ :as args]]
   (apply f args)
-  (delete-file-recursively (antlr-dest-dir project) true))
+  (clean/delete-file-recursively (antlr-dest-dir project) true))
 
 ;; Add a hook to the "lein clean" task to clean the ANTLR target directory.
-(add-hook #'leiningen.clean/clean clean-antlr-hook);
+(add-hook #'clean/clean clean-antlr-hook);
