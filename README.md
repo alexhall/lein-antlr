@@ -1,20 +1,16 @@
 lein-antlr
 ==========
 
-**lein-antlr** is a [Leiningen](https://github.com/technomancy/leiningen) plugin for generating source
+**lein-antlr** is a [Leiningen 2](https://github.com/technomancy/leiningen) plugin for generating source
 code from one or more [ANTLR](http://www.antlr.org) grammars in a Leiningen project. It has roughly
 the same functionality as the Maven ANTLR plugin, and is intended to allow developers to integrate
 ANTLR-generated source code into a Clojure project without resorting to Maven or some other manual process.
 
-Download It
------------
+To use <tt>lein-antlr</tt> in your project, simply add it to <tt>:plugins</tt> in your <tt>project.clj</tt>:
 
-The lein-antlr plugin is available for download at [Clojars](http://clojars.org/). The group and
-artifact IDs are both 'lein-antlr'.
-
-Or better, yet, just add it to your project's dev-dependencies and let Leiningen do the work for you:
-
-    :dev-dependencies [[lein-antlr "0.1.0"]]
+    :plugins [[lein-antlr "0.2.0"]]
+	
+Leiningen 1.x users can use the old 0.1.0 version of <tt>lein-antlr</tt>.
 
 Usage
 -----
@@ -53,12 +49,6 @@ description. This entry should be a map of keyword-value pairs as follows:
   <th>Type</th>
   <th>Default Value</th>
   <th>Description</th>
- </tr>
- <tr>
-  <td><tt>:conversion-timeout</tt></td>
-  <td>integer</td>
-  <td>10000</td>
-  <td>The timeout that ANTLR will wait before giving up when analyzing a decision in the grammar.</td>
  </tr>
  <tr>
   <td><tt>:debug</tt></td>
