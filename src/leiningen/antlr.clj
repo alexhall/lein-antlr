@@ -12,22 +12,7 @@
 ;;  See the License for the specific language governing permissions and
 ;;  limitations under the License.
 
-(ns
-  ^{:doc "This library defines a plugin for generating source from an ANTLR grammar in Leiningen.
-
-A typical project configuration will look like:
-
-(defproject my-project
-  ...
-  :antlr-src-dir \"src/antlr\"
-  :antlr-dest-dir \"gen-src\"
-  :antlr-options { ... }
-  ...
-)
-
-The plugin can be invoked by calling 'lein antlr' from the command line. See the project README for
-a full listing of configuration options."}
-  leiningen.antlr
+(ns leiningen.antlr
   (:use [leiningen.clean :as clean :only (clean delete-file-recursively)]
         [robert.hooke :only (add-hook)])
   (:import [java.io File FileFilter]
@@ -166,8 +151,21 @@ grammar files to generate output in a corresponding subdirectory of the destinat
 (defn antlr-options "Determine the ANTLR config options for the project."
   [project] (get project :antlr-options))
 
-(defn antlr [project]
-  "Compile ANTLR grammars for the given project."
+(defn antlr
+  "Generate Java source from an ANTLR grammar.
+
+A typical project configuration will look like:
+
+(defproject my-project
+  ...
+  :antlr-src-dir \"src/antlr\"
+  :antlr-dest-dir \"gen-src\"
+  :antlr-options { ... }
+  ...
+)
+
+See https://github.com/alexhall/lein-antlr for a full listing of configuration options."
+  [project]
   (compile-antlr (antlr-src-dir project)
                  (antlr-dest-dir project)
                  (antlr-options project)))
