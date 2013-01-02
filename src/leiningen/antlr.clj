@@ -177,4 +177,5 @@ See https://github.com/alexhall/lein-antlr for a full listing of configuration o
   (clean/delete-file-recursively (antlr-dest-dir project) true))
 
 ;; Add a hook to the "lein clean" task to clean the ANTLR target directory.
-(add-hook #'clean/clean clean-antlr-hook);
+(defn activate []
+  (add-hook #'clean/clean clean-antlr-hook))
