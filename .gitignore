@@ -6,3 +6,4 @@ classes
 .classpath
 antlr-out
 target
+.lein-failures
