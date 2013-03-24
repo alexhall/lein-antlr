@@ -79,6 +79,18 @@ and returns a seq of absolute File objects that represent those relative paths r
 ;;   :report false
 ;;   :profile false})
 
+(def ^{:doc "The set of options with boolean values.
+  These keys will only be included if true."} boolean-antlr-args
+  (set ["-atn"
+        "-long-messages"
+        "-listener"
+        "-no-listener"
+        "-visitor"
+        "-no-visitor"
+        "-depend"
+        "-Werror"
+        "-Xlog"]))
+
 (def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
   {:o "gen-src"
    :lib nil
@@ -150,9 +162,13 @@ and returns a seq of absolute File objects that represent those relative paths r
   [antlr-opts output-dir grammar-files]
   (let [opts-map (merge default-antlr-opts antlr-opts {:o (.getAbsolutePath output-dir)})
         args-map (map-opts-to-args opts-map)
-        antlr-args (flatten (into [] (filter (fn [[k v]] (not (nil? v))) args-map)))
+        antlr-args (into [] (map (fn [[k v]]
+                                   (if (contains? boolean-antlr-args k)
+                                     (if v k nil)
+                                     (if (not (nil? v)) [k v] nil))) args-map))
+        antlr-args-clean (flatten (filter #(not (nil? %)) antlr-args))
         antlr-file-args (map #(.getAbsolutePath %) grammar-files)]
-    (concat antlr-args antlr-file-args)))
+    (concat antlr-args-clean antlr-file-args)))
 
 (defn process-antlr-dir
   "Processes ANTLR grammar files in the given intput directory to generate output in the given output directory
