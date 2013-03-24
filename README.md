@@ -30,7 +30,7 @@ The plugin is configured in your <tt>project.clj</tt> as follows:
     )
 
 The plugin will scan the source directory specified by <tt>:antlr-src-dir</tt> and its subdirectories for all
-ANTLR grammar files (i.e. those files whose names end in '.g') and compile them, placing the generated
+ANTLR grammar files (i.e. those files whose names end in '.g' or '.g4') and compile them, placing the generated
 source code into the destination directory specified by <tt>:antlr-dest-dir</tt>. Grammar files located in
 subdirectories of the source directory will have their generated code placed into corresponding subdirectories
 in the destination directory.
@@ -59,13 +59,13 @@ description. This entry should be a map of keyword-value pairs as follows:
  <tr>
   <td><tt>:encoding</tt></td>
   <td>String</td>
-  <td>""</td>
+  <td></td>
   <td>specify grammar file encoding; e.g., euc-jp</td>
  </tr>
  <tr>
   <td><tt>:message-format</tt></td>
   <td>String</td>
-  <td>""</td>
+  <td></td>
   <td>specify output style for messages in antlr, gnu, vs2005</td>
  </tr>
  <tr>
@@ -89,7 +89,7 @@ description. This entry should be a map of keyword-value pairs as follows:
  <tr>
   <td><tt>:visitor</tt></td>
   <td>boolean</td>
-  <td>"antlr"</td>
+  <td>false</td>
   <td>generate parse tree visitor</td>
  </tr>
  <tr>
@@ -101,7 +101,7 @@ description. This entry should be a map of keyword-value pairs as follows:
  <tr>
   <td><tt>:package</tt></td>
   <td>String</td>
-  <td>"as specified in grammar-files"</td>
+  <td>as specified in grammar-files</td>
   <td>specify a package/namespace for the generated code</td>
  </tr>
  <tr>
