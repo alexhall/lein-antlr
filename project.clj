@@ -1,6 +1,6 @@
-(defproject lein-antlr "0.2.1-SNAPSHOT"
+(defproject lein-antlr "0.2.2-SNAPSHOT"
   :description "Generate source code from ANTLR grammars in Leiningen."
-  :dependencies [[org.antlr/antlr "3.4"]]
+  :dependencies [[org.antlr/antlr4 "4.0"]]
   :profile {:dev {:dependencies [[org.clojure/clojure "1.4.0"]]}}
   :url "http://github.com/alexhall/lein-antlr"
   :eval-in-leiningen true
