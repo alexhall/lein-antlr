@@ -34,16 +34,19 @@
   (let [result (with-out-str (antlr (antlr-project "test")))]
     (is (true? (.startsWith result "Compiling ANTLR grammars"))))
   (are [x] (true? (out-file-exists x))
-    "test/SimpleCalc.tokens"
-    "test/SimpleCalcLexer.java"
-    "test/SimpleCalcParser.java"
-    "test/paren/ParenCalc.tokens"
-    "test/paren/ParenCalcLexer.java"
-    "test/paren/ParenCalcParser.java")
-  (let [timestamp (.lastModified (out-file "test/SimpleCalcLexer.java"))]
-    (Thread/sleep 2000)
-    (antlr (antlr-project "test"))
-    (is (= timestamp (.lastModified (out-file "test/SimpleCalcLexer.java"))))))
+       "test/SimpleCalc.tokens"
+       "test/SimpleCalcLexer.java"
+       "test/SimpleCalcParser.java"
+       "test/paren/ParenCalc.tokens"
+       "test/paren/ParenCalcLexer.java"
+       "test/paren/ParenCalcParser.java")
+  (comment
+    "ANTLR3 used timestamps on generated source files to avoid re-processing grammars
+     that had not changed. ANTLR4 appears to re-process the grammar each time."
+    (let [timestamp (.lastModified (out-file "test/SimpleCalcLexer.java"))]
+      (Thread/sleep 2000)
+      (antlr (antlr-project "test"))
+      (is (= timestamp (.lastModified (out-file "test/SimpleCalcLexer.java")))))))
 
 (deftest test-antlr-invalid
   (is (thrown? RuntimeException (antlr (antlr-project "test-invalid"))))
