@@ -1,4 +1,4 @@
-(defproject lein-antlr "0.2.2-SNAPSHOT"
+(defproject lein-antlr "0.3.0"
   :description "Generate source code from ANTLR grammars in Leiningen."
   :dependencies [[org.antlr/antlr4 "4.5"]]
   :profile {:dev {:dependencies [[org.clojure/clojure "1.4.0"]]}}
