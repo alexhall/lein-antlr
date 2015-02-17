@@ -15,9 +15,11 @@
 (ns leiningen.antlr
   (:use [leiningen.clean :as clean :only (clean delete-file-recursively)]
         [robert.hooke :only (add-hook)])
+  (:require [clojure.string :as str])
   (:import [java.io File FileFilter]
            [java.net URI]
-           [org.antlr Tool]))
+           [org.antlr.v4 Tool]
+           [org.antlr.v4.tool ErrorType]))
 
 (defn sub-dirs
   "Recursively find all subdirectories under the given root directory. Also returns the root directory."
@@ -65,70 +67,127 @@ and returns a seq of absolute File objects that represent those relative paths r
     (for [^URI child-path child-paths]
       (File. (.resolve parent-uri child-path)))))
 
-(def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
-  {:debug false
-   :trace false
-   :dfa false
-   :nfa false
-   :message-format "antlr"
-   :verbose true
-   :max-switch-case-labels 300
-   :print-grammar false
-   :report false
-   :profile false})
+;;(def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
+;;  {:debug false
+;;   :trace false
+;;   :dfa false
+;;   :nfa false
+;;   :message-format "antlr"
+;;   :verbose true
+;;   :max-switch-case-labels 300
+;;   :print-grammar false
+;;   :report false
+;;   :profile false})
 
-(def ^{:doc "Mapping of option names to symbols representing the corresponding setter methods on
-the org.antlr.Tool class."} opts-to-setter-map
-  {:debug 'setDebug
-   :trace 'setTrace
-   :dfa 'setGenerate_DFA_dot
-   :nfa 'setGenerate_NFA_dot
-   :message-format 'setMessageFormat
-   :verbose 'setVerbose
-   :max-switch-case-labels 'setMaxSwitchCaseLabels
-   :print-grammar 'setPrintGrammar
-   :report 'setReport
-   :profile 'setProfile})
+(def ^{:doc "The set of options with boolean values.
+  These keys will only be included if true."} boolean-antlr-args
+  (set ["-atn"
+        "-long-messages"
+        "-listener"
+        "-no-listener"
+        "-visitor"
+        "-no-visitor"
+        "-depend"
+        "-Werror"
+        "-Xlog"]))
+
+(def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
+  {:o "gen-src"
+   :lib nil
+   :atn nil
+   :encoding nil
+   :message-format nil
+   :long-messages nil
+   :listener nil
+   :no-listener nil
+   :visitor nil
+   :no-visitor nil
+   :package nil
+   :depend nil
+   :Werror nil
+   :Xlog nil})
+
+
+;;(def ^{:doc "Mapping of option names to symbols representing the corresponding setter methods on
+;;the org.antlr.v4.Tool class."} opts-to-setter-map
+;;  {:debug 'setDebug
+;;   :trace 'setTrace
+;;   :dfa 'setGenerate_DFA_dot
+;;   :nfa 'setGenerate_NFA_dot
+;;   :message-format 'setMessageFormat
+;;   :verbose 'setVerbose
+;;   :max-switch-case-labels 'setMaxSwitchCaseLabels
+;;   :print-grammar 'setPrintGrammar
+;;   :report 'setReport
+;;   :profile 'setProfile})
+
+(defn ^{:doc "Mapping of option names to arguments to be passed to the constructor of
+  the org.antlr.v4.Tool class."}
+  map-opts-to-args
+  [opts-map]
+  (reduce (fn [args-map k]
+            (if (contains? opts-map k)
+              (assoc args-map (str/join "" ["-" (name k)]) (get opts-map k))
+              args-map)) {} (keys default-antlr-opts)))
 
 (def ^{:doc "The collection of file extensions that ANTLR accepts (hard-coded in the ANTLR tool)."}
-      file-types #{"g" "g3"})
+      file-types #{"g" "g4"})
 
-(defmacro make-antlr-tool [antlr-opts]
-  "Creates the ANTLR tool and initializes it with the configuration settings in antlr-opts."
-  (let [tool-sym (gensym "tool-")
-        opts-sym (gensym "opts-")]
-    `(let [~tool-sym (Tool.)
-           ~opts-sym (merge default-antlr-opts ~antlr-opts)]
-       ~@(for [antlr-opt (keys opts-to-setter-map)]
-          (let [setter-sym (opts-to-setter-map antlr-opt)]
-            `(. ~tool-sym ~setter-sym (~opts-sym ~antlr-opt))))
-       ~tool-sym)))
+;;(defmacro make-antlr-tool [antlr-opts]
+;;  "Creates the ANTLR tool and initializes it with the configuration settings in antlr-opts."
+;;  (let [tool-sym (gensym "tool-")
+;;        opts-sym (gensym "opts-")]
+;;    `(let [~tool-sym (Tool.)
+;;           ~opts-sym (merge default-antlr-opts ~antlr-opts)]
+;;       ~@(for [antlr-opt (keys opts-to-setter-map)]
+;;          (let [setter-sym (opts-to-setter-map antlr-opt)]
+;;            `(. ~tool-sym ~setter-sym (~opts-sym ~antlr-opt))))
+;;       ~tool-sym)))
 
-(defn prepare-tool
-  "Prepares the ANTLR tool with the given input directory, output directory, and source grammar files."
-  [^Tool tool ^File input-dir ^File output-dir grammar-files]
-  (doto tool
-    (.setOutputDirectory (.getAbsolutePath output-dir))
-    (.setForceAllFilesToOutputDir true)
-    (.setInputDirectory (.getAbsolutePath input-dir)))
-  (when (not (empty? grammar-files))
-    (.setMake tool true)
-    (doseq [grammar-file grammar-files]
-      (.addGrammarFile tool (.getName grammar-file)))))
+;;(defn prepare-tool
+;;  "Prepares the ANTLR tool with the given input directory, output directory, and source grammar files."
+;;  [^Tool tool ^File input-dir ^File output-dir grammar-files]
+;;  (doto tool
+;;    (.setOutputDirectory (.getAbsolutePath output-dir))
+;;    (.setForceAllFilesToOutputDir true)
+;;    (.setInputDirectory (.getAbsolutePath input-dir)))
+;;  (when (not (empty? grammar-files))
+;;    (.setMake tool true)
+;;    (doseq [grammar-file grammar-files]
+;;      (.addGrammarFile tool (.getName grammar-file)))))
+
+
+(defn make-antlr-args
+  "Make the array of arguments to construct the Tool"
+  [antlr-opts output-dir grammar-files]
+  (let [opts-map (merge default-antlr-opts antlr-opts {:o (.getAbsolutePath output-dir)})
+        args-map (map-opts-to-args opts-map)
+        antlr-args (into [] (map (fn [[k v]]
+                                   (if (contains? boolean-antlr-args k)
+                                     (if v k nil)
+                                     (if (not (nil? v)) [k v] nil))) args-map))
+        antlr-args-clean (flatten (filter #(not (nil? %)) antlr-args))
+        antlr-file-args (map #(.getAbsolutePath %) grammar-files)]
+    (concat antlr-args-clean antlr-file-args)))
 
 (defn process-antlr-dir
   "Processes ANTLR grammar files in the given intput directory to generate output in the given output directory
 with the given configuration options."
   [^File input-dir ^File output-dir antlr-opts]
   (let [grammar-files (files-of-type input-dir file-types)
-        antlr-tool (make-antlr-tool antlr-opts)]
-    ;; The ANTLR tool uses static state to track errors -- reset before each run.
-    (org.antlr.tool.ErrorManager/resetErrorState)
-    (println "Compiling ANTLR grammars:" (apply str (interpose " " (map #(.getName %) grammar-files))) "...")
-    (prepare-tool antlr-tool input-dir output-dir grammar-files)
-    (.process antlr-tool)
-    (if (> (.getNumErrors antlr-tool) 0)
-      (throw (RuntimeException. (str "ANTLR detected " (.getNumErrors antlr-tool) " grammar errors."))))))
+        antlr-args (make-antlr-args antlr-opts output-dir grammar-files)
+        antlr-tool (Tool. (into-array String antlr-args))]
+    (println "Compiling ANTLR grammars:" (apply str (interpose " " (map #(.getName %) grammar-files))) "...") 
+    (try
+      (.processGrammarsOnCommandLine antlr-tool)
+      (finally
+        (do
+          (if (.log antlr-tool)
+            (try
+              (.save (.logMgr antlr-tool))
+              (catch java.io.IOException ioe (.toolError (.errMgr antlr-tool) ErrorType/INTERNAL_ERROR ioe))))
+          (if (> (.getNumErrors (.errMgr antlr-tool)) 0)
+            (throw (RuntimeException. (str "ANTLR detected " (.getNumErrors (.errMgr antlr-tool)) " grammar errors.")))))))))
 
 (defn compile-antlr
   "Recursively process all subdirectories within the given top-level source directory that contain ANTLR

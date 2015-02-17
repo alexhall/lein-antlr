@@ -1,6 +1,7 @@
 // Simple ANTLR grammar, borrowed from http://www.antlr.org/wiki/display/ANTLR3/Five+minute+introduction+to+ANTLR+3
 
 // Chopped off the last few lines so this is an invalid grammar file.
+// Is also not a valid antlr4 file
 
 grammar InvalidCalc;
 

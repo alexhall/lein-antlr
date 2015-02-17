@@ -2,12 +2,6 @@
 
 grammar SimpleCalc;
 
-tokens {
-  PLUS  = '+' ;
-  MINUS = '-' ;
-  MULT  = '*' ;
-  DIV = '/' ;
-}
 
 @members {
     public static void main(String[] args) throws Exception {
@@ -39,8 +33,14 @@ factor  : NUMBER ;
  * LEXER RULES
  *------------------------------------------------------------------*/
 
+PLUS  : '+' ;
+MINUS : '-' ;
+MULT  : '*' ;
+DIV   : '/' ;
+
+
 NUMBER  : (DIGIT)+ ;
 
-WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+  { $channel = HIDDEN; } ;
+WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+  -> channel(HIDDEN) ;
 
 fragment DIGIT  : '0'..'9' ;

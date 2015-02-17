@@ -2,13 +2,13 @@ lein-antlr
 ==========
 
 **lein-antlr** is a [Leiningen 2](https://github.com/technomancy/leiningen) plugin for generating source
-code from one or more [ANTLR](http://www.antlr.org) grammars in a Leiningen project. It has roughly
+code from one or more [ANTLR 4](http://www.antlr.org) grammars in a Leiningen project. It has roughly
 the same functionality as the Maven ANTLR plugin, and is intended to allow developers to integrate
 ANTLR-generated source code into a Clojure project without resorting to Maven or some other manual process.
 
 To use <tt>lein-antlr</tt> in your project, simply add it to <tt>:plugins</tt> in your <tt>project.clj</tt>:
 
-    :plugins [[lein-antlr "0.2.0"]]
+    :plugins [[lein-antlr "0.2.2-SNAPSHOT"]]
 	
 Leiningen 1.x users can use the old 0.1.0 version of <tt>lein-antlr</tt>.
 
@@ -25,12 +25,12 @@ The plugin is configured in your <tt>project.clj</tt> as follows:
       ...
       :antlr-src-dir "src/antlr"
       :antlr-dest-dir "gen-src"
-      :antlr-options {:verbose true
+      :antlr-options {:Werror true
                       ... }
     )
 
 The plugin will scan the source directory specified by <tt>:antlr-src-dir</tt> and its subdirectories for all
-ANTLR grammar files (i.e. those files whose names end in '.g') and compile them, placing the generated
+ANTLR grammar files (i.e. those files whose names end in '.g' or '.g4') and compile them, placing the generated
 source code into the destination directory specified by <tt>:antlr-dest-dir</tt>. Grammar files located in
 subdirectories of the source directory will have their generated code placed into corresponding subdirectories
 in the destination directory.
@@ -51,66 +51,76 @@ description. This entry should be a map of keyword-value pairs as follows:
   <th>Description</th>
  </tr>
  <tr>
-  <td><tt>:debug</tt></td>
+  <td><tt>:atn</tt></td>
   <td>boolean</td>
   <td>false</td>
-  <td>Generate code in debug mode (i.e. starts up and waits for a debug connection on a TCP port).
-Useful for interacting with ANTLRWorks; be sure to disable for production code.</td>
+  <td>generate rule augmented transition network diagrams</td>
  </tr>
  <tr>
-  <td><tt>:trace</tt></td>
-  <td>boolean</td>
-  <td>false</td>
-  <td>Generate code that will log rule entry and exit points to stdout when executed.</td>
- </tr>
- <tr>
-  <td><tt>:profile</tt></td>
-  <td>boolean</td>
-  <td>false</td>
-  <td>Generate code that will collect and report profiling information when executed.</td>
- </tr>
- <tr>
-  <td><tt>:report</tt></td>
-  <td>boolean</td>
-  <td>false</td>
-  <td>Report information about the grammars as they are processed.</td>
- </tr>
- <tr>
-  <td><tt>:verbose</tt></td>
-  <td>boolean</td>
-  <td>true</td>
-  <td>Put the ANTLR tool into verbose mode; will not affect the generated code.</td>
- </tr>
- <tr>
-  <td><tt>:print-grammar</tt></td>
-  <td>boolean</td>
-  <td>false</td>
-  <td>Print a version of the grammar with actions removed as it is processed.</td>
+  <td><tt>:encoding</tt></td>
+  <td>String</td>
+  <td></td>
+  <td>specify grammar file encoding; e.g., euc-jp</td>
  </tr>
  <tr>
   <td><tt>:message-format</tt></td>
   <td>String</td>
-  <td>"antlr"</td>
-  <td>Determines the format to use for warning and error messages returned by ANTLR.
-Should be one of "antlr", "gnu", or "vs2005".</td>
+  <td></td>
+  <td>specify output style for messages in antlr, gnu, vs2005</td>
  </tr>
  <tr>
-  <td><tt>:max-switch-case-labels</tt></td>
-  <td>integer</td>
-  <td>300</td>
-  <td>The maximum number of rule alternatives that ANTLR will condense into a case statement.</td>
- </tr>
- <tr>
-  <td><tt>:dfa</tt></td>
+  <td><tt>:long-messages</tt></td>
   <td>boolean</td>
   <td>false</td>
-  <td>Generate a description of the DFA for each decision in the grammar as it is processed.</td>
+  <td>show exception details when available for errors and warnings</td>
  </tr>
  <tr>
-  <td><tt>:nfa</tt></td>
+  <td><tt>:listener</tt></td>
+  <td>boolean</td>
+  <td>true</td>
+  <td>generate parse tree listener (default)</td>
+ </tr>
+ <tr>
+  <td><tt>:no-listener</tt></td>
   <td>boolean</td>
   <td>false</td>
-  <td>Print a description of the NFA for each rule as it is analyzed.</td>
+  <td>don't generate parse tree listener</td>
+ </tr>
+ <tr>
+  <td><tt>:visitor</tt></td>
+  <td>boolean</td>
+  <td>false</td>
+  <td>generate parse tree visitor</td>
+ </tr>
+ <tr>
+  <td><tt>:no-visitor</tt></td>
+  <td>boolean</td>
+  <td>true</td>
+  <td>don't generate parse tree visitor (default)</td>
+ </tr>
+ <tr>
+  <td><tt>:package</tt></td>
+  <td>String</td>
+  <td>as specified in grammar-files</td>
+  <td>specify a package/namespace for the generated code</td>
+ </tr>
+ <tr>
+  <td><tt>:depend</tt></td>
+  <td>boolean</td>
+  <td>false</td>
+  <td>generate file dependencies</td>
+ </tr>
+ <tr>
+  <td><tt>:Werror</tt></td>
+  <td>boolean</td>
+  <td>false</td>
+  <td>treat warnings as errors</td>
+ </tr>
+ <tr>
+  <td><tt>:Xlog</tt></td>
+  <td>boolean</td>
+  <td>false</td>
+  <td>dump lots of logging info to antlr-timestamp.log</td>
  </tr>
 </table>
 
