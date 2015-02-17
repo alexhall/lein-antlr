@@ -67,18 +67,6 @@ and returns a seq of absolute File objects that represent those relative paths r
     (for [^URI child-path child-paths]
       (File. (.resolve parent-uri child-path)))))
 
-;;(def ^{:doc "Default options for the ANTLR tool."} default-antlr-opts
-;;  {:debug false
-;;   :trace false
-;;   :dfa false
-;;   :nfa false
-;;   :message-format "antlr"
-;;   :verbose true
-;;   :max-switch-case-labels 300
-;;   :print-grammar false
-;;   :report false
-;;   :profile false})
-
 (def ^{:doc "The set of options with boolean values.
   These keys will only be included if true."} boolean-antlr-args
   (set ["-atn"
@@ -108,19 +96,6 @@ and returns a seq of absolute File objects that represent those relative paths r
    :Xlog nil})
 
 
-;;(def ^{:doc "Mapping of option names to symbols representing the corresponding setter methods on
-;;the org.antlr.v4.Tool class."} opts-to-setter-map
-;;  {:debug 'setDebug
-;;   :trace 'setTrace
-;;   :dfa 'setGenerate_DFA_dot
-;;   :nfa 'setGenerate_NFA_dot
-;;   :message-format 'setMessageFormat
-;;   :verbose 'setVerbose
-;;   :max-switch-case-labels 'setMaxSwitchCaseLabels
-;;   :print-grammar 'setPrintGrammar
-;;   :report 'setReport
-;;   :profile 'setProfile})
-
 (defn ^{:doc "Mapping of option names to arguments to be passed to the constructor of
   the org.antlr.v4.Tool class."}
   map-opts-to-args
@@ -132,30 +107,6 @@ and returns a seq of absolute File objects that represent those relative paths r
 
 (def ^{:doc "The collection of file extensions that ANTLR accepts (hard-coded in the ANTLR tool)."}
       file-types #{"g" "g4"})
-
-;;(defmacro make-antlr-tool [antlr-opts]
-;;  "Creates the ANTLR tool and initializes it with the configuration settings in antlr-opts."
-;;  (let [tool-sym (gensym "tool-")
-;;        opts-sym (gensym "opts-")]
-;;    `(let [~tool-sym (Tool.)
-;;           ~opts-sym (merge default-antlr-opts ~antlr-opts)]
-;;       ~@(for [antlr-opt (keys opts-to-setter-map)]
-;;          (let [setter-sym (opts-to-setter-map antlr-opt)]
-;;            `(. ~tool-sym ~setter-sym (~opts-sym ~antlr-opt))))
-;;       ~tool-sym)))
-
-;;(defn prepare-tool
-;;  "Prepares the ANTLR tool with the given input directory, output directory, and source grammar files."
-;;  [^Tool tool ^File input-dir ^File output-dir grammar-files]
-;;  (doto tool
-;;    (.setOutputDirectory (.getAbsolutePath output-dir))
-;;    (.setForceAllFilesToOutputDir true)
-;;    (.setInputDirectory (.getAbsolutePath input-dir)))
-;;  (when (not (empty? grammar-files))
-;;    (.setMake tool true)
-;;    (doseq [grammar-file grammar-files]
-;;      (.addGrammarFile tool (.getName grammar-file)))))
-
 
 (defn make-antlr-args
   "Make the array of arguments to construct the Tool"
